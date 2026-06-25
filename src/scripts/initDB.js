@@ -1,7 +1,8 @@
 require('dotenv').config();
 const { testConnection, syncDB } = require('../db/sequelize');
 const { User, Order, OrderStatusLog, VerifyCode } = require('../models');
-const { UserRole, OrderStatus, ClothingType, ClothingPriceMap } = require('../constants');
+const { UserRole, OrderStatus, ClothingType } = require('../constants');
+const { calculatePrice } = require('../utils/price');
 const dayjs = require('dayjs');
 const { logger } = require('../utils/logger');
 
@@ -43,7 +44,7 @@ async function initDB() {
     address: '阳光小区1栋302室',
     clothingType: ClothingType.SHIRT,
     clothingCount: 3,
-    price: ClothingPriceMap[ClothingType.SHIRT] * 3,
+    price: calculatePrice(ClothingType.SHIRT, 3),
     remark: '有一件衬衫上有油渍需要重点清洗',
     expectedPickupTime: dayjs().add(1, 'day').hour(10).minute(0).second(0).toDate(),
     status: OrderStatus.PENDING_PICKUP,
@@ -63,7 +64,7 @@ async function initDB() {
     address: '阳光小区5栋201室',
     clothingType: ClothingType.SUIT,
     clothingCount: 1,
-    price: ClothingPriceMap[ClothingType.SUIT] * 1,
+    price: calculatePrice(ClothingType.SUIT, 1),
     remark: '西装需要干洗',
     expectedPickupTime: dayjs().add(2, 'hour').toDate(),
     status: OrderStatus.PICKED_UP,
@@ -93,7 +94,7 @@ async function initDB() {
     address: '阳光小区1栋302室',
     clothingType: ClothingType.BEDDING,
     clothingCount: 2,
-    price: ClothingPriceMap[ClothingType.BEDDING] * 2,
+    price: calculatePrice(ClothingType.BEDDING, 2),
     remark: '被套和床单',
     expectedPickupTime: dayjs().subtract(1, 'day').toDate(),
     actualPickupTime: dayjs().subtract(1, 'day').add(1, 'hour').toDate(),

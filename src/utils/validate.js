@@ -1,4 +1,8 @@
 const { ErrorCode } = require('../constants');
+const {
+  isValidClothingType: priceIsValidClothingType,
+  getValidClothingTypeText,
+} = require('./price');
 
 function isValidPhone(phone) {
   return /^1[3-9]\d{9}$/.test(phone);
@@ -15,8 +19,18 @@ function buildParamError(fields) {
   };
 }
 
+function isValidClothingType(clothingType) {
+  return priceIsValidClothingType(clothingType);
+}
+
+function getValidClothingTypeErrorMessage() {
+  return `衣服类型无效，可选值: ${getValidClothingTypeText()}`;
+}
+
 module.exports = {
   isValidPhone,
   generateVerifyCode,
   buildParamError,
+  isValidClothingType,
+  getValidClothingTypeErrorMessage,
 };

@@ -100,20 +100,6 @@ const ClothingTypeText = {
   [ClothingType.OTHER]: '其他',
 };
 
-const ClothingPriceMap = {
-  [ClothingType.TSHIRT]: 8,
-  [ClothingType.SHIRT]: 8,
-  [ClothingType.TROUSERS]: 8,
-  [ClothingType.COAT]: 8,
-  [ClothingType.DRESS]: 8,
-  [ClothingType.TOWEL]: 15,
-  [ClothingType.BEDDING]: 15,
-  [ClothingType.SILK]: 25,
-  [ClothingType.WOOL]: 25,
-  [ClothingType.SUIT]: 25,
-  [ClothingType.OTHER]: 8,
-};
-
 const StatusTransitionRules = {
   [OrderStatus.PENDING_PICKUP]: [OrderStatus.PICKED_UP, OrderStatus.CANCELLED],
   [OrderStatus.PICKED_UP]: [OrderStatus.WASHING, OrderStatus.CANCELLED],
@@ -130,6 +116,5 @@ module.exports = {
   UserRole,
   ClothingType,
   ClothingTypeText,
-  ClothingPriceMap,
   StatusTransitionRules,
 };

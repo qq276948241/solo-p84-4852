@@ -6,14 +6,18 @@ const {
   StatusTransitionRules,
   ClothingType,
   ClothingTypeText,
-  ClothingPriceMap,
   UserRole,
 } = require('../constants');
 const { logger } = require('../utils/logger');
 const { sequelize } = require('../db/sequelize');
 const { Order, OrderStatusLog, User } = require('../models');
 const dayjs = require('dayjs');
-const { Op, QueryTypes } = require('sequelize');
+const { Op } = require('sequelize');
+const {
+  isValidClothingType,
+  getValidClothingTypeErrorMessage,
+} = require('../utils/validate');
+const { calculatePrice, getUnitPrice } = require('../utils/price');
 
 function generateOrderNo() {
   const now = Date.now();
@@ -30,7 +34,7 @@ function formatOrder(order) {
     clothingType: order.clothingType,
     clothingTypeText: ClothingTypeText[order.clothingType] || order.clothingType,
     clothingCount: order.clothingCount,
-    unitPrice: ClothingPriceMap[order.clothingType] || 0,
+    unitPrice: getUnitPrice(order.clothingType),
     price: parseFloat(order.price) || 0,
     remark: order.remark,
     expectedPickupTime: order.expectedPickupTime
@@ -104,11 +108,11 @@ async function createOrder(req, res) {
     );
   }
 
-  if (!Object.values(ClothingType).includes(clothingType)) {
+  if (!isValidClothingType(clothingType)) {
     return res.json(
       error(
         ErrorCode.PARAM_INVALID,
-        `衣服类型无效，可选值: ${Object.keys(ClothingType).join(', ')}`
+        getValidClothingTypeErrorMessage()
       )
     );
   }
@@ -152,8 +156,7 @@ async function createOrder(req, res) {
     }
 
     const result = await sequelize.transaction(async (t) => {
-      const unitPrice = ClothingPriceMap[clothingType] || 0;
-      const totalPrice = unitPrice * clothingCount;
+      const totalPrice = calculatePrice(clothingType, clothingCount);
 
       const order = await Order.create(
         {
