@@ -13,11 +13,7 @@ const { sequelize } = require('../db/sequelize');
 const { Order, OrderStatusLog, User } = require('../models');
 const dayjs = require('dayjs');
 const { Op } = require('sequelize');
-const {
-  isValidClothingType,
-  getValidClothingTypeErrorMessage,
-} = require('../utils/validate');
-const { calculatePrice, getUnitPrice } = require('../utils/price');
+const { calculatePrice, getUnitPrice, normalizeClothingType } = require('../utils/price');
 
 function generateOrderNo() {
   const now = Date.now();
@@ -98,8 +94,8 @@ async function createOrder(req, res) {
 
   const missingFields = [];
   if (!address) missingFields.push('address');
-  if (!clothingType) missingFields.push('clothingType');
-  if (!clothingCount) missingFields.push('clothingCount');
+  if (clothingType === undefined || clothingType === null || clothingType === '') missingFields.push('clothingType');
+  if (clothingCount === undefined || clothingCount === null) missingFields.push('clothingCount');
   if (!expectedPickupTime) missingFields.push('expectedPickupTime');
 
   if (missingFields.length > 0) {
@@ -108,17 +104,9 @@ async function createOrder(req, res) {
     );
   }
 
-  if (!isValidClothingType(clothingType)) {
-    return res.json(
-      error(
-        ErrorCode.PARAM_INVALID,
-        getValidClothingTypeErrorMessage()
-      )
-    );
-  }
-
-  if (!Number.isInteger(clothingCount) || clothingCount < 1 || clothingCount > 100) {
-    return res.json(error(ErrorCode.PARAM_INVALID, '件数必须是1-100之间的整数'));
+  const priceResult = calculatePrice(clothingType, clothingCount);
+  if (!priceResult.ok) {
+    return res.json(error(priceResult.code, priceResult.message));
   }
 
   const pickupDate = new Date(expectedPickupTime);
@@ -156,16 +144,16 @@ async function createOrder(req, res) {
     }
 
     const result = await sequelize.transaction(async (t) => {
-      const totalPrice = calculatePrice(clothingType, clothingCount);
+      const normalizedType = normalizeClothingType(clothingType);
 
       const order = await Order.create(
         {
           orderNo: generateOrderNo(),
           customerId,
           address,
-          clothingType,
+          clothingType: normalizedType,
           clothingCount,
-          price: totalPrice,
+          price: priceResult.price,
           expectedPickupTime: pickupDate,
           remark: remark || null,
           status: OrderStatus.PENDING_PICKUP,

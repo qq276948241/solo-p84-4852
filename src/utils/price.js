@@ -1,4 +1,4 @@
-const { ClothingType, ClothingTypeText } = require('../constants');
+const { ClothingType, ClothingTypeText, ErrorCode } = require('../constants');
 
 const PRICE_MAP = {
   [ClothingType.TSHIRT]: 8,
@@ -16,19 +16,35 @@ const PRICE_MAP = {
 
 const DEFAULT_UNIT_PRICE = 0;
 
+function normalizeClothingType(clothingType) {
+  if (typeof clothingType !== 'string') return '';
+  return clothingType.toLowerCase();
+}
+
 function getUnitPrice(clothingType) {
-  const price = PRICE_MAP[clothingType];
+  const normalized = normalizeClothingType(clothingType);
+  const price = PRICE_MAP[normalized];
   return typeof price === 'number' ? price : DEFAULT_UNIT_PRICE;
 }
 
 function calculatePrice(clothingType, clothingCount) {
-  const unitPrice = getUnitPrice(clothingType);
-  const count = Number.isInteger(clothingCount) && clothingCount > 0 ? clothingCount : 0;
-  return unitPrice * count;
+  const normalized = normalizeClothingType(clothingType);
+  const unitPrice = PRICE_MAP[normalized];
+  if (typeof unitPrice !== 'number') {
+    return { ok: false, code: ErrorCode.PARAM_INVALID, message: `衣服类型无效: ${clothingType}` };
+  }
+  if (!Number.isInteger(clothingCount) || clothingCount <= 0) {
+    return { ok: false, code: ErrorCode.PARAM_INVALID, message: '件数必须为正整数' };
+  }
+  if (clothingCount > 100) {
+    return { ok: false, code: ErrorCode.PARAM_INVALID, message: '件数不能超过100' };
+  }
+  return { ok: true, price: unitPrice * clothingCount };
 }
 
 function isValidClothingType(clothingType) {
-  return Object.prototype.hasOwnProperty.call(PRICE_MAP, clothingType);
+  const normalized = normalizeClothingType(clothingType);
+  return Object.prototype.hasOwnProperty.call(PRICE_MAP, normalized);
 }
 
 function getValidClothingTypes() {
@@ -44,6 +60,7 @@ function getValidClothingTypeText() {
 module.exports = {
   PRICE_MAP,
   DEFAULT_UNIT_PRICE,
+  normalizeClothingType,
   getUnitPrice,
   calculatePrice,
   isValidClothingType,
