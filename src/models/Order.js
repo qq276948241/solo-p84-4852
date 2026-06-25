@@ -42,6 +42,12 @@ Order.init(
       field: 'clothing_count',
       comment: '件数',
     },
+    price: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0,
+      comment: '订单总价（元）',
+    },
     remark: {
       type: DataTypes.STRING(500),
       allowNull: true,

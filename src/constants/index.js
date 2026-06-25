@@ -73,23 +73,45 @@ const UserRole = {
 };
 
 const ClothingType = {
+  TSHIRT: 'tshirt',
   SHIRT: 'shirt',
   TROUSERS: 'trousers',
   COAT: 'coat',
   DRESS: 'dress',
-  SUIT: 'suit',
+  TOWEL: 'towel',
   BEDDING: 'bedding',
+  SILK: 'silk',
+  WOOL: 'wool',
+  SUIT: 'suit',
   OTHER: 'other',
 };
 
 const ClothingTypeText = {
+  [ClothingType.TSHIRT]: 'T恤',
   [ClothingType.SHIRT]: '衬衫',
   [ClothingType.TROUSERS]: '裤子',
   [ClothingType.COAT]: '外套',
   [ClothingType.DRESS]: '连衣裙',
-  [ClothingType.SUIT]: '西装',
+  [ClothingType.TOWEL]: '毛巾',
   [ClothingType.BEDDING]: '床上用品',
+  [ClothingType.SILK]: '真丝',
+  [ClothingType.WOOL]: '羊毛',
+  [ClothingType.SUIT]: '西装',
   [ClothingType.OTHER]: '其他',
+};
+
+const ClothingPriceMap = {
+  [ClothingType.TSHIRT]: 8,
+  [ClothingType.SHIRT]: 8,
+  [ClothingType.TROUSERS]: 8,
+  [ClothingType.COAT]: 8,
+  [ClothingType.DRESS]: 8,
+  [ClothingType.TOWEL]: 15,
+  [ClothingType.BEDDING]: 15,
+  [ClothingType.SILK]: 25,
+  [ClothingType.WOOL]: 25,
+  [ClothingType.SUIT]: 25,
+  [ClothingType.OTHER]: 8,
 };
 
 const StatusTransitionRules = {
@@ -108,5 +130,6 @@ module.exports = {
   UserRole,
   ClothingType,
   ClothingTypeText,
+  ClothingPriceMap,
   StatusTransitionRules,
 };

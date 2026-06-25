@@ -6,6 +6,7 @@ const {
   StatusTransitionRules,
   ClothingType,
   ClothingTypeText,
+  ClothingPriceMap,
   UserRole,
 } = require('../constants');
 const { logger } = require('../utils/logger');
@@ -29,6 +30,8 @@ function formatOrder(order) {
     clothingType: order.clothingType,
     clothingTypeText: ClothingTypeText[order.clothingType] || order.clothingType,
     clothingCount: order.clothingCount,
+    unitPrice: ClothingPriceMap[order.clothingType] || 0,
+    price: parseFloat(order.price) || 0,
     remark: order.remark,
     expectedPickupTime: order.expectedPickupTime
       ? dayjs(order.expectedPickupTime).format('YYYY-MM-DD HH:mm:ss')
@@ -149,6 +152,9 @@ async function createOrder(req, res) {
     }
 
     const result = await sequelize.transaction(async (t) => {
+      const unitPrice = ClothingPriceMap[clothingType] || 0;
+      const totalPrice = unitPrice * clothingCount;
+
       const order = await Order.create(
         {
           orderNo: generateOrderNo(),
@@ -156,6 +162,7 @@ async function createOrder(req, res) {
           address,
           clothingType,
           clothingCount,
+          price: totalPrice,
           expectedPickupTime: pickupDate,
           remark: remark || null,
           status: OrderStatus.PENDING_PICKUP,
